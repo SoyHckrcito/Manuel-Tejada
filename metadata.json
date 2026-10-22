@@ -1,0 +1,8 @@
+{
+  "name": "Remix Manuel Tejada — Web Oficial \u0026 Panel de Administración",
+  "description": "Sitio web oficial del maestro Manuel Tejada con sistema de cuentas, roles, analíticas y panel de administración visual sin código.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

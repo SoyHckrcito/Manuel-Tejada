@@ -1,0 +1,86 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isEmailVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isSuperAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == 'sologemiiiii@gmail.com' ||
+        request.auth.token.email == 'soloplaycinco@gmail.com'
+      );
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Users collection
+    match /users/{userId} {
+      allow read: if isSuperAdmin() || (isSignedIn() && request.auth.uid == userId);
+      allow create: if isSuperAdmin() || (
+        isSignedIn() &&
+        request.auth.uid == userId &&
+        request.resource.data.keys().hasAll(['uid', 'email', 'username', 'role', 'status']) &&
+        request.resource.data.role == 'USER' &&
+        request.resource.data.status == 'ACTIVE'
+      );
+      allow update: if isSuperAdmin() || (
+        isSignedIn() &&
+        request.auth.uid == userId &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['username', 'avatarUrl', 'lastActivityAt'])
+      );
+      allow delete: if isSuperAdmin();
+    }
+
+    // Site Content (Public read, admin write)
+    match /site_content/{contentId} {
+      allow read: if true;
+      allow write: if isSuperAdmin();
+    }
+
+    // Announcements (Public read, admin write)
+    match /announcements/{announcementId} {
+      allow read: if true;
+      allow write: if isSuperAdmin();
+    }
+
+    // Contact messages (Anyone can submit, admin can read/manage)
+    match /contact_messages/{messageId} {
+      allow read: if isSuperAdmin();
+      allow create: if request.resource.data.keys().hasAll(['name', 'email', 'subject', 'message']) &&
+                       request.resource.data.name is string && request.resource.data.name.size() <= 100 &&
+                       request.resource.data.email is string && request.resource.data.email.size() <= 150 &&
+                       request.resource.data.subject is string && request.resource.data.subject.size() <= 200 &&
+                       request.resource.data.message is string && request.resource.data.message.size() <= 2000;
+      allow update, delete: if isSuperAdmin();
+    }
+
+    // Visitor activity logs
+    match /visitor_activity/{activityId} {
+      allow read: if isSuperAdmin();
+      allow create: if request.resource.data.keys().hasAll(['sessionId', 'pagePath']) &&
+                       request.resource.data.sessionId is string && request.resource.data.sessionId.size() <= 128 &&
+                       request.resource.data.pagePath is string && request.resource.data.pagePath.size() <= 255;
+      allow update, delete: if isSuperAdmin();
+    }
+
+    // Audit logs (Admin only)
+    match /audit_logs/{logId} {
+      allow read: if isSuperAdmin();
+      allow write: if isSuperAdmin();
+    }
+  }
+}

@@ -1,0 +1,115 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile with role and authentication state",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "username": { "type": "string", "maxLength": 50 },
+        "role": { "type": "string", "enum": ["OWNER", "ADMIN", "MODERATOR", "USER"] },
+        "status": { "type": "string", "enum": ["ACTIVE", "SUSPENDED"] },
+        "avatarUrl": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["uid", "email", "username", "role", "status"]
+    },
+    "SiteContent": {
+      "title": "SiteContent",
+      "description": "Website CMS published and draft content",
+      "type": "object",
+      "properties": {
+        "publishedData": { "type": "string" },
+        "draftData": { "type": "string" },
+        "lastUpdatedBy": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["publishedData"]
+    },
+    "AuditLog": {
+      "title": "AuditLog",
+      "description": "Administrative actions audit log",
+      "type": "object",
+      "properties": {
+        "actorUsername": { "type": "string" },
+        "action": { "type": "string" },
+        "targetId": { "type": "string" },
+        "details": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["action", "details"]
+    },
+    "VisitorActivity": {
+      "title": "VisitorActivity",
+      "description": "Page view and session tracking record",
+      "type": "object",
+      "properties": {
+        "sessionId": { "type": "string" },
+        "isAnonymous": { "type": "boolean" },
+        "pagePath": { "type": "string" },
+        "userAgent": { "type": "string" },
+        "durationSeconds": { "type": "number" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["sessionId", "pagePath"]
+    },
+    "ContactMessage": {
+      "title": "ContactMessage",
+      "description": "Contact form submissions from fans and collaborators",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "maxLength": 100 },
+        "email": { "type": "string", "format": "email", "maxLength": 150 },
+        "subject": { "type": "string", "maxLength": 200 },
+        "message": { "type": "string", "maxLength": 2000 },
+        "isReviewed": { "type": "boolean" },
+        "isHidden": { "type": "boolean" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["name", "email", "subject", "message"]
+    },
+    "Announcement": {
+      "title": "Announcement",
+      "description": "Official news and press announcements",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "maxLength": 200 },
+        "content": { "type": "string", "maxLength": 10000 },
+        "imageUrl": { "type": "string" },
+        "authorName": { "type": "string" },
+        "authorRole": { "type": "string" },
+        "isPinned": { "type": "boolean" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["title", "content", "authorName", "authorRole"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "User accounts and role metadata"
+    },
+    "/site_content/{contentId}": {
+      "schema": { "$ref": "#/entities/SiteContent" },
+      "description": "Website CMS content and configuration"
+    },
+    "/audit_logs/{logId}": {
+      "schema": { "$ref": "#/entities/AuditLog" },
+      "description": "Audit trails for admin operations"
+    },
+    "/visitor_activity/{activityId}": {
+      "schema": { "$ref": "#/entities/VisitorActivity" },
+      "description": "Visitor session and page view logs"
+    },
+    "/contact_messages/{messageId}": {
+      "schema": { "$ref": "#/entities/ContactMessage" },
+      "description": "Inquiries and messages sent to Manuel Tejada"
+    },
+    "/announcements/{announcementId}": {
+      "schema": { "$ref": "#/entities/Announcement" },
+      "description": "Official announcements and news items"
+    }
+  }
+}
